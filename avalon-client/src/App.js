@@ -18,7 +18,7 @@ function App() {
       fetch('/server/auth/' + name + '/' + key).then(res => res.json()).then(res => setAuth(res.success))
       fetch('/server/get_mode').then(res => res.json()).then(res => {if (res.success) setMode(res.data)})
       fetch('/server/lobby/get_players').then(res => res.json()).then(res => {if (res.success) setPlayers(res.data)})
-      fetch('/server/lobby/get_roles').then(res => res.json()).then(res => {if (res.success) setRoles(res.data)})
+      fetch('/server/lobby/get_roles').then(res => res.json()).then(res => {if (res.success) {console.log(res.data); setRoles(res.data)}})
       fetch('/server/game/get_game_state/' + name + '/' + key).then(res => res.json()).then(res => {if (res.success) setGameState(res)})
       fetch('/server/game/get_my_state/' + name + '/' + key).then(res => res.json()).then(res => {if (res.success) setMyState(res)})
     }, 1000)
