@@ -10,7 +10,8 @@ function App() {
   const [message, setMessage] = useState("")
   const [gameState, setGameState] = useState({'round': 0, 'successes': [], 'fails': [], 'mission': 0, 'captain': 0, 'skips': 0, 'proposed': false, 'approved': false, 'proposal': [], 'votes': [], 'hypertext': 'ReactJS is legendary', 'assassin_mode': false})
   const [myState, setMyState] = useState({'i': 0, 'roles': [], 'vote': '', 'act': '', 'assassin': false});
-  let [name, key] = window.location.pathname.replace('/', '').split('-')
+  const url_components = window.location.pathname.split('/')
+  let [name, key] = url_components[url_components.length - 1].split('-')
 
   useEffect(() => {
     const interval = setInterval(() => {
