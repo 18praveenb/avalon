@@ -20,7 +20,7 @@ function App() {
       fetch('/server/lobby/get_roles').then(res => res.json()).then(res => {if (res.success) setRoles(res.data)})
       fetch('/server/game/get_game_state/' + name + '/' + key).then(res => res.json()).then(res => {if (res.success) setGameState(res)})
       fetch('/server/game/get_my_state/' + name + '/' + key).then(res => res.json()).then(res => {if (res.success) setMyState(res)})
-    }, 1000)
+    }, 250)
 
     return () => {
       clearInterval(interval)
