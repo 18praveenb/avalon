@@ -1,6 +1,13 @@
-.active {
-    color: green;
+.active, .suceed {
     font-weight: bold;
+}
+
+.succeed {
+    color: green;
+}
+
+.fail {
+    color: red;
 }
 
 .inactive {}

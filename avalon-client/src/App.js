@@ -8,8 +8,8 @@ function App() {
   const [roles, setRoles] = useState({})
   const [auth, setAuth] = useState(false)
   const [message, setMessage] = useState("")
-  const [gameState, setGameState] = useState({'round': 0, 'successes': [], 'fails': [], 'mission': 0, 'captain': 0, 'skips': 0, 'proposed': false, 'approved': false, 'proposal': [], 'votes': []})
-  const [myState, setMyState] = useState({'i': 0, 'roles': []});
+  const [gameState, setGameState] = useState({'round': 0, 'successes': [], 'fails': [], 'mission': 0, 'captain': 0, 'skips': 0, 'proposed': false, 'approved': false, 'proposal': [], 'votes': [], 'hypertext': 'ReactJS is legendary', 'assassin_mode': false})
+  const [myState, setMyState] = useState({'i': 0, 'roles': [], 'vote': '', 'act': '', 'assassin': false});
   let [name, key] = window.location.pathname.replace('/', '').split('-')
 
   useEffect(() => {
@@ -118,22 +118,25 @@ function App() {
           <button onClick={() => vote('disapprove')} className={myState.vote ==='disapprove' ? 'active' : 'inactive'}>Reject</button>
         </div>
       )
+      const act_view = (
+        <div>
+          <button onClick={() => fetch('/server/game/act/' + name + '/' + key + '/success')} className='succeed'>Succeed</button>
+          <button onClick={() => fetch('/server/game/act/' + name + '/' + key + '/fail')} className='fail'>Fail</button>
+        </div>
+      )
       const render_round = (round) => (
         (gameState.successes.includes(round) ? "W" : gameState.fails.includes(round) ? "L" : "_") + " "
       )
       custom_content = (
         <div>
+          <h3>{gameState['hypertext']}</h3>
           <p>{[0, 1, 2, 3, 4].map(round => render_round(round))}</p>
+          <p>Rejected teams: {gameState.skips}</p> 
           <h1>Players</h1>
           <table className="table"><tbody>{players_html}</tbody></table>
-          {gameState.proposed ? approve_view : captain ? captain_view : ""}
+          {gameState.assassin_mode ? '' : gameState.approved ? (gameState.proposal.includes(name) && myState.act === '' ? act_view : "It's time for a vote!") : gameState.proposed ? approve_view : captain ? captain_view : ""}
           <p>{message}</p>
         </div>
-      )
-      break
-    case 'results':
-      custom_content = (
-        <p>What's up?</p>
       )
       break
     default:
