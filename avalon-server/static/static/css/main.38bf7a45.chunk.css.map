@@ -1,0 +1,1 @@
+{"version":3,"sources":["App.css"],"names":[],"mappings":"AAAA,gBACI,eACJ,CAEA,SACI,WACJ,CAEA,MACI,SACJ","file":"main.38bf7a45.chunk.css","sourcesContent":[".active, .suceed {\n    font-weight: bold;\n}\n\n.succeed {\n    color: green;\n}\n\n.fail {\n    color: red;\n}\n\n.inactive {}"]}

@@ -4,7 +4,7 @@ from functools import wraps
 from flask import Flask
 
 # from https://blog.miguelgrinberg.com/post/how-to-deploy-a-react--flask-project
-app = Flask(__name__, static_folder='../avalon-client/build')
+app = Flask(__name__)
 @app.route('/ignore/<params>')
 def index(params):
     return app.send_static_file('index.html')
