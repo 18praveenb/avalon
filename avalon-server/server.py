@@ -143,7 +143,6 @@ def auth(name, key):
 @app.route('/server/get_mode')
 @insecure
 def get_mode():
-    broadcast(f'The mode is {mode}')
     return {'data': mode}
 
 @app.route('/server/lobby/kick/<name>')
@@ -171,6 +170,7 @@ def get_players():
 @insecure
 @modal('lobby')
 def get_roles():
+    print({'data': roles})
     return {'data': roles}
 
 @app.route('/server/lobby/start_game')
