@@ -1,1 +1,1 @@
-web: gunicorn server:app --chdir avalon-server
+web: cd avalon-server; gunicorn server:app
