@@ -130,7 +130,6 @@ function App() {
       )
       custom_content = (
         <div>
-          <h3>{gameState['hypertext']}</h3>
           <p>{[0, 1, 2, 3, 4].map(round => render_round(round))}</p>
           <p>Rejected teams: {gameState.skips}</p> 
           <h1>Players</h1>
@@ -150,6 +149,7 @@ function App() {
 
   return (
     <Container className="justify-content-md-center">
+      <h3>{gameState['hypertext']}</h3>
         {mode_tag}
         {custom_content}
     </Container>
