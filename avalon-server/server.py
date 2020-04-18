@@ -23,6 +23,7 @@ roles = {
     'arthur': False,
     'morgana': False,
     'mordred': False,
+    'oberon': False
 }
 
 alignments = {
