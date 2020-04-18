@@ -143,8 +143,23 @@ function App() {
       break
   }
 
+  const login = () => {
+    const name = document.getElementById('name').value;
+    const password = document.getElementById('password').value;
+    window.location.pathname = "/ignore/" + name + '-' + password
+  }
+
   if (!auth) {
-    custom_content = <p>Authentication failed!</p>
+    custom_content = (
+      <div>
+        <p>Authentication failed!</p>
+        <p>Name</p>
+        <textarea id="name" rows="1"></textarea>
+        <p>Password</p>
+        <textarea id="password" rows="1"></textarea>
+        <button onClick={login}>Log in</button>
+      </div>
+    )
   }
 
   return (
