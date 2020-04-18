@@ -146,7 +146,7 @@ function App() {
   const login = () => {
     const name = document.getElementById('name').value;
     const password = document.getElementById('password').value;
-    window.location.pathname = "/ignore/" + name + '-' + password
+    window.location.pathname = "/" + name + '-' + password
   }
 
   if (!auth) {

@@ -170,7 +170,6 @@ def get_players():
 @insecure
 @modal('lobby')
 def get_roles():
-    print({'data': roles})
     return {'data': roles}
 
 @app.route('/server/lobby/start_game')
