@@ -9,6 +9,10 @@ app = Flask(__name__)
 def index():
     return app.send_static_file('index.html')
 
+@app.route('/user/<params>')
+def parametrized_index(params):
+    return app.send_static_file('index.html')
+
 rangel = lambda l: range(len(l))
 
 roles = {
