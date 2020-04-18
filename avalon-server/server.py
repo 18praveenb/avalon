@@ -3,14 +3,11 @@ from functools import wraps
 
 from flask import Flask
 
+# from https://blog.miguelgrinberg.com/post/how-to-deploy-a-react--flask-project
 app = Flask(__name__)
-
+@app.route('/')
 def index(params):
     return app.send_static_file('index.html')
-
-index_ignore = app.route('/ignore/<params>')(index)
-index_ignore_root = app.route('/ignore')(index)
-index_root = app.route('/')(index)
 
 rangel = lambda l: range(len(l))
 
