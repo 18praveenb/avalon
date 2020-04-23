@@ -16,13 +16,13 @@ def parametrized_index(params):
 rangel = lambda l: range(len(l))
 
 roles = {
-    'merlin': False,
-    'percival': False,
+    'merlin': True,
+    'percival': True,
     'merciful': False,
     'gawain': False,
     'arthur': False,
-    'morgana': False,
-    'mordred': False,
+    'morgana': True,
+    'mordred': True,
     'oberon': False
 }
 
@@ -42,6 +42,7 @@ alignments = {
 def active_roles():
     return [role for role in roles if roles[role]]
 
+prev_mode = 'lobby'
 mode = 'lobby'
 
 configs = {
@@ -55,6 +56,7 @@ configs = {
     10: [6, 4, [3, 4, 4, 5.1, 5]]
 }
 
+kicked = []
 players = []
 player_roles = []
 player_votes = {}
@@ -77,6 +79,7 @@ def new_game_state():
         'votes': [],
         'hypertext': 'Trust no one',
         'assassin_mode': False,
+        'rounds': configs[len(players)][2] if len(players) in configs else ['ERROR']
     }
 
 game_state = new_game_state()
@@ -87,11 +90,11 @@ def sees(i, j):
         return player_roles[i] + ('+assassin' if i == assassin else '')
     if a == 'merlin' and alignments[b] == 'bad' and b != 'mordred':
         return 'bad'
-    if a == 'percival' and b in ['merlin', 'percival']:
-        return 'merlin?'
+    if a == 'percival' and b in ['merlin', 'morgana']:
+        return 'merlin' + ('?' if 'morgana' in player_roles else '')
     if alignments[a] == 'bad' and a != 'oberon':
         if (alignments[b] == 'bad' and b != 'oberon') or b == 'merciful':
-            return 'bad'
+            return 'bad' + ('?' if 'merciful' in player_roles else '')
     if a == 'loyal' and b == 'arthur':
         return 'arthur'
     return '?'
@@ -139,11 +142,32 @@ def requires(predicate):
         return wrapped
     return wrap
 
+@app.route('/server/get_kicked')
+@insecure
+def get_kicked():
+    return {'data': kicked}
+
 @app.route('/server/auth/<name>/<key>')
 def auth(name, key):
-    if name not in player_names() and mode == 'lobby':
+    if name not in player_names() and name not in kicked and mode == 'lobby':
         players.append((name, key))
     return secure(lambda *args: {})(name, key)
+
+@app.route('/server/reset')
+@insecure
+def reset():
+    global mode, prev_mode
+    if mode != 'lobby':
+        prev_mode = mode
+    mode = 'lobby'
+    return {}
+
+@app.route('/server/unreset')
+@insecure
+def unreset():
+    global mode
+    mode = prev_mode
+    return {}
 
 @app.route('/server/get_mode')
 @insecure
@@ -155,6 +179,7 @@ def get_mode():
 @modal('lobby')
 def kick(name):
     global players
+    kicked.append(name)
     players = [(name_, key) for (name_, key) in players if name_ != name]
     return {}
 
@@ -181,7 +206,7 @@ def get_roles():
 @insecure
 @modal('lobby')
 def start_game():
-    global game_state, player_roles, mode, assassin
+    global game_state, player_roles, mode, assassin, kicked
     def fail(message):
         return {'started': False, 'message': message}
     if len(players) not in configs:
@@ -204,13 +229,14 @@ def start_game():
             break
     game_state = new_game_state()
     mode = 'game'
+    kicked = []
     return {'started': True, 'message': 'Good luck!'}
     
 @app.route('/server/game/get_game_state/<name>/<key>')
 @secure
 @modal('game', 'captain')
 def get_game_state(name):
-    return game_state
+    return {**game_state, 'actors': list(player_acts.keys())}
 
 @app.route('/server/game/get_my_state/<name>/<key>')
 @secure
@@ -223,7 +249,8 @@ def get_my_state(name):
             'roles': [sees(i, j) for j in rangel(player_roles)],
             'vote': player_votes[i] if i in player_votes else '',
             'act': player_acts[i] if i in player_acts else '',
-            'assassin': i == assassin
+            'assassin': i == assassin,
+            'good': alignments[player_roles[i]] == 'good'
         }
     return fail
 
@@ -246,7 +273,7 @@ def toggle_proposal(name, proposal):
 def propose_team(name):
     global player_votes
     num = len(game_state['proposal'])
-    num_needed = configs[len(players)][2][game_state['round']]
+    num_needed = int(configs[len(players)][2][game_state['round']])
     if num != num_needed:
         return {**fail, 'message': f'Need {num_needed} players, {num} selected'}
     player_votes = {}
@@ -282,17 +309,21 @@ def act(name, act):
         or name not in game_state['proposal']
         or name in player_acts
         or act not in ['success', 'fail']):
+        print("FAIL", name, player_names(), game_state['proposal'], player_acts, act)
         return fail
     i = player_names().index(name)
     if alignments[player_roles[i]] == 'good' and act == 'fail':
         return fail # bwahaha
     player_acts[name] = act
-    if len(player_acts) == configs[len(players)][2][game_state['round']]:
+    num_actors = configs[len(players)][2][game_state['round']]
+    fails_needed = 2 if num_actors % 1 != 0 else 1
+    num_actors = int(num_actors)
+    if len(player_acts) == num_actors:
         num_fails = sum([act == 'fail' for act in player_acts.values()])
-        if num_fails > 0:
+        if num_fails >= fails_needed:
             mission_fail(num_fails)
         else:
-            mission_succeed()
+            mission_succeed(num_fails)
     return success
 
 def broadcast(message):
@@ -323,8 +354,8 @@ def mission_end():
     player_acts = {}
     next_captain()
 
-def mission_succeed():
-    broadcast("The mission succeeded!")
+def mission_succeed(num_fails):
+    broadcast(f"The mission succeeded with {num_fails} fails")
     game_state['successes'].append(game_state['round'])
     mission_end()
     if len(game_state['successes']) >= 3:

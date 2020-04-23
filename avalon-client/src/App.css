@@ -11,3 +11,11 @@
 }
 
 .inactive {}
+
+.activeRole {
+    color: green;
+}
+
+.inactiveRole {
+    color: gray;
+}
