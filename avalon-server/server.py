@@ -83,7 +83,7 @@ game_state = new_game_state()
 
 def sees(i, j):
     a, b = player_roles[i], player_roles[j]
-    if i == j or True:
+    if i == j:
         return player_roles[i] + ('+assassin' if i == assassin else '')
     if a == 'merlin' and alignments[b] == 'bad' and b != 'mordred':
         return 'bad'
