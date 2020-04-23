@@ -58,7 +58,7 @@ function App() {
 
   const render_vote = (vote) => vote === 'approve' ? '✅' : vote === 'disapprove' ? '🛑' : '...'
 
-  const hammer = () => (gameState.captain + 5 - gameState.skips) % players.length;
+  const hammer = () => (gameState.captain + 4 - gameState.skips) % players.length;
 
   let players_html = null;
   // eslint-disable-next-line
