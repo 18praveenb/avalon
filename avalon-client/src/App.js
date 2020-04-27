@@ -56,6 +56,12 @@ function App() {
     fetch('/server/game/vote/' + name + '/' + key + '/' + vote)
   }
 
+  // https://stackoverflow.com/questions/13237421/how-to-generate-random-words-in-javascript
+  // https://stackoverflow.com/questions/30650961/functional-way-to-iterate-over-range-es6-7
+  const randels = (array, num) => (
+    [...Array(num)].map((_, i) => array[Math.floor(Math.random() * array.length)]).join('')
+  )
+
   const render_vote = (vote) => vote === 'approve' ? '✅' : vote === 'disapprove' ? '🛑' : '...'
 
   const hammer = () => (gameState.captain + 4 - gameState.skips) % players.length;
@@ -106,8 +112,12 @@ function App() {
       players_html = players.map((player, i) => (
         <tr key={player}>
           <td>{captain && !gameState.proposed ? player_approve_box(player, i) : player_info_box(player, i)}</td>
-          <td>{(i === hammer() && i === gameState.captain) ? "🟠🔨" : i === hammer() ? '🔨' : i === gameState.captain ? '🟠' : ''}</td>
-          <td>{player}</td>
+          <td>{
+            [(i === myState.i ? ' (me)' : ''),
+             (i === hammer() ? '🔨' : ''),
+             (i === gameState.captain ? '🟠' : '')].join('')
+          }</td>
+          <td className={i === myState.i ? '' : ''}>{player}</td>
           <td>{myState.roles[i]}</td>
           {gameState.votes.length === players.length ? vote_details_box(player, i) : did_vote_box(player, i)}
         </tr>
@@ -155,13 +165,23 @@ function App() {
   }
 
   if (!auth) {
+    const default_name = (randels(['king', 'queen', 'duke', 'jester',
+                                   'squire', 'knight',], 1)
+                          + ' of '
+                          + randels([...'1234567890'], 2))
+                          + ' '
+                          + randels(['clubs', 'spades', 'hearts', 'clovers',
+                                     'diamonds', 'dollars', 'realms'])
+    const default_password = (randels(['gradient', 'hessian', 'jacobian',
+                                       'sigmoid', 'relu', 'tanh',], 1)
+                              + randels([...'1234567890'], 3))
     custom_content = (
       <div>
-        <p>Authentication failed!</p>
+        <p>Authentication failed! Don't give up, try logging in with a new username and password</p>
         <p>Name</p>
-        <textarea id="name" rows="1"></textarea>
+        <textarea id="name" rows="1" defaultValue={default_name}></textarea>
         <p>Password</p>
-        <textarea id="password" rows="1"></textarea>
+        <textarea id="password" rows="1" defaultValue={default_password}></textarea>
         <button onClick={login}>Log in</button>
       </div>
     )

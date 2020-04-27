@@ -15,10 +15,18 @@ def parametrized_index(params):
 
 rangel = lambda l: range(len(l))
 
+def irange(start, stop=None, step=None):
+    if stop is None:
+        stop = start
+        start = 0
+    if step is None:
+        step = 1
+    return range(start, stop+1, step)
+
 roles = {
     'merlin': True,
     'percival': True,
-    'merciful': False,
+    'merciful': True,
     'gawain': False,
     'arthur': False,
     'morgana': True,
@@ -29,7 +37,7 @@ roles = {
 alignments = {
     'merlin': 'good',
     'percival': 'good',
-    'merciful': 'good',
+    'merciful': 'attribute',
     'gawain': 'good',
     'arthur': 'good',
     'loyal': 'good',
@@ -62,6 +70,7 @@ player_roles = []
 player_votes = {}
 player_acts = {}
 assassin = 0
+merciful = -1
 
 def to_player_list(x):
     return [x[i] if i in x else None for i in range(len(players))]
@@ -87,14 +96,16 @@ game_state = new_game_state()
 def sees(i, j):
     a, b = player_roles[i], player_roles[j]
     if i == j:
-        return player_roles[i] + ('+assassin' if i == assassin else '')
+        return player_roles[i] + ('+assassin' if i == assassin
+                                  else '+merciful' if i == merciful
+                                  else '')
     if a == 'merlin' and alignments[b] == 'bad' and b != 'mordred':
         return 'bad'
     if a == 'percival' and b in ['merlin', 'morgana']:
         return 'merlin' + ('?' if 'morgana' in player_roles else '')
     if alignments[a] == 'bad' and a != 'oberon':
-        if (alignments[b] == 'bad' and b != 'oberon') or b == 'merciful':
-            return 'bad' + ('?' if 'merciful' in player_roles else '')
+        if (alignments[b] == 'bad' and b != 'oberon') or j == merciful:
+            return 'bad' + ('?' if merciful >= 0 else '')
     if a == 'loyal' and b == 'arthur':
         return 'arthur'
     return '?'
@@ -206,7 +217,7 @@ def get_roles():
 @insecure
 @modal('lobby')
 def start_game():
-    global game_state, player_roles, mode, assassin, kicked
+    global game_state, player_roles, mode, assassin, kicked, merciful
     def fail(message):
         return {'started': False, 'message': message}
     if len(players) not in configs:
@@ -222,11 +233,14 @@ def start_game():
         return fail('Too many bad roles')
     player_roles = good_roles + bad_roles + ['loyal'] * num_loyal + ['minion'] * num_minion
     random.shuffle(player_roles)
-    while True:
-        assassin = random.randrange(len(players))
-        if (alignments[player_roles[assassin]] != 'good'
-            and (num_minion == 0 or player_roles[assassin] == 'minion')):
-            break
+    if num_minion > 0:
+        predicate = lambda player: player_roles[player] == 'minion'
+    else:
+        predicate = lambda player: alignments[player_roles[player]] == 'bad'
+    assassin = random.choice([player for player in rangel(players) if predicate(player)])
+    if roles['merciful']:
+        predicate = lambda player: alignments[player_roles[player]] == 'good'
+        merciful = random.choice([player for player in rangel(players) if predicate(player)])
     game_state = new_game_state()
     mode = 'game'
     kicked = []
