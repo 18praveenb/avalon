@@ -149,7 +149,7 @@ function App() {
           <p>Rejected teams: {gameState.skips}</p> 
           <h1>Players</h1>
           <table className="table"><tbody>{players_html}</tbody></table>
-          {gameState.assassin_mode ? '' : gameState.approved ? (gameState.proposal.includes(name) && myState.act === '' ? act_view : "It's time for a vote!") : gameState.proposed ? approve_view : captain ? captain_view : ""}
+          {gameState.assassin_mode ? '' : gameState.approved ? (gameState.proposal.includes(decodeURI(name)) ? (myState.act === '' ? act_view : "you already voted") : "It's time for a vote!" + gameState.proposal + gameState.proposal.includes(name) + name) : gameState.proposed ? approve_view : captain ? captain_view : ""}
           <p>{message}</p>
         </div>
       )
